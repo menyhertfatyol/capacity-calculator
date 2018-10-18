@@ -29,4 +29,32 @@ RSpec.describe CapacityCalculator do
       end
     end
   end
+  
+  describe '#is_last_friday?' do
+    it 'returns true if date is fryday and is the last friday of the month' do
+      expect(CapacityCalculator.new.is_last_friday?(Date.parse "2018-10-26")).to be_truthy
+    end
+
+    it 'returns false if day is in the last week but not friday' do
+      expect(CapacityCalculator.new.is_last_friday?(Date.parse "2018-10-25")).to be_falsey
+    end
+
+    it 'returns false is friday is one before the last friday' do
+      expect(CapacityCalculator.new.is_last_friday?(Date.parse "2018-10-18")).to be_falsey
+    end
+  end
+
+  describe '#is_first_friday?' do
+    it 'returns true if date is fryday and is the first friday of the month' do
+      expect(CapacityCalculator.new.is_first_friday?(Date.parse "2018-10-05")).to be_truthy
+    end
+
+    it 'returns false if day is in the first week but not friday' do
+      expect(CapacityCalculator.new.is_first_friday?(Date.parse "2018-10-04")).to be_falsey
+    end
+
+    it 'returns false is friday is one after the last friday' do
+      expect(CapacityCalculator.new.is_first_friday?(Date.parse "2018-10-12")).to be_falsey
+    end
+  end
 end
