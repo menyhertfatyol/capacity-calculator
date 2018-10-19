@@ -24,10 +24,10 @@ class CapacityCalculator
   end
 
   def is_last_friday?(date)
-    date.friday? && (date + 6).month == (date.month + 1)
+    date.friday? && (date + 7).month == (date.month + 1)
   end
 
   def is_first_friday?(date)
-    date.friday? && (date - 6).month == (date.month - 1)
+    date.friday? && (date - 7).month == (date.month - 1)
   end
 end
