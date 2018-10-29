@@ -4,6 +4,10 @@ RSpec.describe CapacityCalculator do
   describe '#calculate' do
     context "When working on full capacity" do
 
+      cases = [
+          {description: "" pages: 1000, date: "2018-06-11 16:00", result: 1000}
+      ]
+
       it 'returns the maximum amount of pages per hour' do
         expect(CapacityCalculator.new.calculate(1000, "2018-06-11 16:00")).to eq(1000)
       end
