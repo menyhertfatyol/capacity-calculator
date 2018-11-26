@@ -51,7 +51,7 @@ class CapacityCalculator
   end
 
   def is_first_or_last_friday_of_the_month?(first_or_last, date)
-    puts "First parameter should be either 'first' or 'last'!" unless ["first", "last"].include? first_or_last
+    puts "First parameter should be either 'first' or 'last'!" unless %w(first last).include? first_or_last
 
     case first_or_last
     when "first"
