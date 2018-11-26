@@ -9,7 +9,6 @@ RSpec.describe CapacityCalculator do
           {description: "when working on 25% from the first hour", pages: 2000, date: "2018-06-12 09:00", result: 500},
           {description: "when working on 50% from the secound hour", pages: 3000, date: "2018-10-18 10:00", result: 1500},
           {description: "when working on 75% from the third hour", pages: 4000, date: "2018-10-18 11:00", result: 3000},
-          {description: "When press is not open", pages: 4000, date: "2018-10-18 11:00", result: 3000},
       ]
 
       cases.each do |test_case|
@@ -18,39 +17,46 @@ RSpec.describe CapacityCalculator do
         end
       end
     end
+    
+    context "On maintenance day" do
+      cases = [
+          {description: "works on 25% in the first hour of the day", pages: 2000, date: "2018-11-02 09:00", result: 500},
+          {description: "not printing at all during maintenance", pages: 2000, date: "2018-11-30 12:59", result: 0},
+          {description: "restarts from 25% after maintenance", pages: 2000, date: "2018-11-30 13:00", result: 500},
+          {description: "works on 50% from 2nd hour after maintenance", pages: 2000, date: "2018-11-30 14:00", result: 1000},
+          {description: "works on 75% from 3nd hour after maintenance", pages: 2000, date: "2018-11-30 15:00", result: 1500},
+          {description: "works on full capacity after maintenance and warmup", pages: 2000, date: "2018-11-30 16:00", result: 2000},
+      ]
+
+      cases.each do |test_case|
+        it "returns #{test_case[:result]} out of #{test_case[:pages]} pages, #{test_case[:description]}" do
+          expect(CapacityCalculator.new.calculate(test_case[:pages], test_case[:date])).to eq(test_case[:result])
+        end
+      end
+    end
 
     context "When press is not open" do
-      it 'returns a message about the opening hours' do
-        expect(CapacityCalculator.new.calculate(1000, "2018-10-18 07:00")).to eq("The press is open between 9AM - 5PM on weekdays")
+      it 'returns 0' do
+        expect(CapacityCalculator.new.calculate(1000, "2018-10-18 07:00")).to eq(0)
       end
     end
   end
 
-  describe '#is_last_friday?' do
-    it 'returns true if date is fryday and is the last friday of the month' do
-      expect(CapacityCalculator.new.is_last_friday?(Date.parse "2018-10-26")).to be_truthy
-    end
+  describe '#is_first_or_last_friday_of_the_month?' do
+    cases = [
+        {description: "true if date is Friday and is the last Friday of the month", first_or_last: "last", date: "2018-10-26", expectation: true},
+        {description: "false if day is in the last week but not Friday", first_or_last: "last", date: "2018-10-25", expectation: false},
+        {description: "false if Friday is the one before the last Friday", first_or_last: "last", date: "2018-10-18", expectation: false},
+        {description: "true if date is Friday and is the first Friday of the month", first_or_last: "first", date: "2018-10-05", expectation: true},
+        {description: "false if day is in the first week but not Friday", first_or_last: "first", date: "2018-10-04", expectation: false},
+        {description: "false is Friday is the second Friday of the month", first_or_last: "first", date: "2018-10-12", expectation: false},
+    ]
 
-    it 'returns false if day is in the last week but not friday' do
-      expect(CapacityCalculator.new.is_last_friday?(Date.parse "2018-10-25")).to be_falsey
-    end
+    cases.each do |test_case|
 
-    it 'returns false is friday is one before the last friday' do
-      expect(CapacityCalculator.new.is_last_friday?(Date.parse "2018-10-18")).to be_falsey
-    end
-  end
-
-  describe '#is_first_friday?' do
-    it 'returns true if date is fryday and is the first friday of the month' do
-      expect(CapacityCalculator.new.is_first_friday?(Date.parse "2018-10-05")).to be_truthy
-    end
-
-    it 'returns false if day is in the first week but not friday' do
-      expect(CapacityCalculator.new.is_first_friday?(Date.parse "2018-10-04")).to be_falsey
-    end
-
-    it 'returns false is friday is one after the last friday' do
-      expect(CapacityCalculator.new.is_first_friday?(Date.parse "2018-10-12")).to be_falsey
+      it "returns #{test_case[:description]}" do
+        expect(CapacityCalculator.new.is_first_or_last_friday_of_the_month? test_case[:first_or_last], Date.parse(test_case[:date])).to be test_case[:expectation]
+      end
     end
   end
 end
