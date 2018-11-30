@@ -1,48 +1,55 @@
+# todo: lookup strategy pattern
 require 'date'
 
 class CapacityCalculator
 
   def calculate(pages_per_hour, date)
     iso_date = DateTime.parse date
-    return 0 if (iso_date.hour < 9 or iso_date.hour > 17) or (iso_date.saturday? or iso_date.sunday?)
+    raise ArgumentError.new("Press is open only on weekdays from 9 to 17") if is_out_of_work_time?(iso_date)
 
     if is_maintenance_day? iso_date
-      self.pages_on_maintenance_day(pages_per_hour, iso_date.hour)
+      efficiency_on_maintenance_day(iso_date.hour) * pages_per_hour
     else
-      self.pages_by_hour(pages_per_hour, iso_date.hour)
+      efficiency(iso_date.hour) * pages_per_hour
     end
 
   end
 
-  def pages_by_hour(pages, hour)
-    case
-    when hour >= 9 && hour < 10
-      pages * 0.25
-    when hour >= 10 && hour < 11
-      pages * 0.5
-    when hour >= 11 && hour < 12
-      pages * 0.75
+  private
+
+  def is_out_of_work_time?(iso_date)
+    (iso_date.hour < 9 or iso_date.hour > 17) or (iso_date.saturday? or iso_date.sunday?)
+  end
+
+  def efficiency(hour)
+    case hour
+    when 9...10
+      0.25
+    when 10...11
+      0.5
+    when 11...12
+      0.75
     else
-      pages
+      1
     end
   end
 
-  def pages_on_maintenance_day(pages, hour)
-    case
-    when hour >= 9 && hour < 10
-      pages * 0.25
-    when hour >= 10 && hour < 11
-      pages * 0.5
-    when hour >= 11 && hour < 13
+  def efficiency_on_maintenance_day(hour)
+    case hour
+    when 9...10
+      0.25
+    when 10...11
+      0.5
+    when 11...13
       0
-    when hour >= 13 && hour < 14
-      pages * 0.25
-    when hour >= 14 && hour < 15
-      pages * 0.5
-    when hour >= 15 && hour < 16
-      pages * 0.75
+    when 13...14
+      0.25
+    when 14...15
+      0.5
+    when 15...16
+      0.75
     else
-      pages
+      1
     end
   end
 
@@ -51,7 +58,7 @@ class CapacityCalculator
   end
 
   def is_first_or_last_friday_of_the_month?(first_or_last, date)
-    puts "First parameter should be either 'first' or 'last'!" unless %w(first last).include? first_or_last
+    return "First parameter should be either 'first' or 'last'!" unless %w(first last).include? first_or_last
 
     case first_or_last
     when "first"
